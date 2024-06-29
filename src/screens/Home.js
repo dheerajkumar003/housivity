@@ -19,6 +19,7 @@ import {addToSavedList, removeFromSavedList} from '../redux/SavedPropertySlice';
 import {useDispatch, useSelector} from 'react-redux';
 import FilterModal from '../components/FilterModal';
 import {convertToCrLac} from '../utils/convertCurrency';
+import {ImageCDN, getAllPropertiesList} from '../utils/apiService';
 
 const filterData = [
   {
@@ -65,16 +66,14 @@ const Home = () => {
   const getPropertyList = async (pageNumber = 1) => {
     setLoading(true);
     try {
-      const response = await axios.get(
-        'https://api.housivity.com/api/v1/property',
-        {
-          params: {
-            city: 'Gandhinagar',
-            // projectType: ['pgHostel'],
-            page: 1,
-          },
+      const response = await axios.get(getAllPropertiesList, {
+        params: {
+          city: 'Gandhinagar',
+          // projectType: ['pgHostel'],
+          page: pageNumber,
+          limit: 6,
         },
-      );
+      });
 
       // console.log('getPropertyList success', response?.data?.propertyList);
       if (response?.data?.statusCode === 200) {
@@ -106,7 +105,8 @@ const Home = () => {
   };
 
   useEffect(() => {
-    getPropertyList();
+    setPage(1);
+    getPropertyList(1);
   }, [isFocused]);
 
   const handleSaveProperty = property => {
@@ -117,18 +117,8 @@ const Home = () => {
     }
   };
 
-  // const convertToCrLac = amount => {
-  //   if (amount >= 10000000) {
-  //     return `₹${(amount / 10000000).toFixed(2)} Cr`;
-  //   } else if (amount >= 100000) {
-  //     return `₹${(amount / 100000).toFixed(2)} Lac`;
-  //   } else {
-  //     return `₹${amount.toLocaleString()}`;
-  //   }
-  // };
-
-  const renderProperty = ({item}) => {
-    // console.log('itemmmmmmmm', item);
+  const renderProperty = ({item, index}) => {
+    // console.log('itemmmmmmmm', index);
     const isSaved = savedProperties?.some(property => property.id === item.id);
     return (
       <View style={styles.card}>
@@ -136,15 +126,19 @@ const Home = () => {
           horizontal
           ref={flatListRef}
           data={item.images}
-          renderItem={({item}) => (
-            <Image
-              source={{
-                uri: `https://logiqproperty.blr1.digitaloceanspaces.com/${item}`,
-              }}
-              style={styles.image}
-            />
-          )}
-          keyExtractor={(image, index) => `${image}-${index}`}
+          renderItem={({item}) => {
+            // console.log('itemmmmmm', item);
+            return (
+              <Image
+                source={{
+                  uri: `${ImageCDN}${item}`,
+                }}
+                style={styles.image}
+              />
+            );
+          }}
+          keyExtractor={(item, index) => `${item}-${index}`.toString()}
+          // keyExtractor={(id, index) => `${id}-${index}`}
           onScroll={handleScroll}
           showsHorizontalScrollIndicator={false}
           pagingEnabled
@@ -256,6 +250,8 @@ const Home = () => {
           <FlatList
             horizontal
             data={filterData}
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={item => item.id.toString()}
             ItemSeparatorComponent={() => <View style={{marginRight: 20}} />}
             renderItem={renderFilters}
           />
@@ -267,7 +263,8 @@ const Home = () => {
           ItemSeparatorComponent={() => <View style={{marginBottom: 15}} />}
           onEndReached={loadMoreProperties}
           onEndReachedThreshold={0.5}
-          key={item => item.id}
+          // keyExtractor={item => item.id.toString()}
+          keyExtractor={(item, index) => `${item?.id}-${index}`.toString()}
           ListFooterComponent={
             loading ? (
               <View

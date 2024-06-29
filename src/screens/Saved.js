@@ -19,8 +19,6 @@ import {convertToCrLac} from '../utils/convertCurrency';
 const Saved = () => {
   const savedProperties = useSelector(state => state.myProperties);
   const dispatch = useDispatch();
-  console.log('saved----saved----', savedProperties?.length);
-
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef(null);
 
@@ -131,7 +129,7 @@ const Saved = () => {
           renderItem={renderProperty}
           showsVerticalScrollIndicator={false}
           ItemSeparatorComponent={() => <View style={{marginBottom: 15}} />}
-          key={item => item.id}
+          keyExtractor={item => item.id.toString()}
           ListEmptyComponent={() => {
             return (
               <View style={styles.noDataView}>
@@ -154,12 +152,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 16,
-    // padding: 16,
   },
   card: {
     flex: 1,
     borderWidth: 0.5,
-    // paddingHorizontal: 20,
     padding: 20,
     borderRadius: 10,
     borderColor: Colors.grey,
