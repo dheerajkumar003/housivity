@@ -3,13 +3,14 @@ import {
   Dimensions,
   FlatList,
   Image,
+  RefreshControl,
   SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import axios from 'axios';
 import {useIsFocused} from '@react-navigation/native';
 import {Colors} from '../assets/theme';
@@ -42,10 +43,12 @@ const filterData = [
 const Home = () => {
   const isFocused = useIsFocused();
   const [propertyList, setPropertyList] = useState('');
+  console.log('property length', propertyList?.length);
   const [filterType, setFilterType] = useState('');
   const [loading, setLoading] = useState(false);
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [page, setPage] = useState(1);
+  const [refresh, setRefresh] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const dispatch = useDispatch();
   const savedProperties = useSelector(state => state.myProperties);
@@ -69,13 +72,11 @@ const Home = () => {
       const response = await axios.get(getAllPropertiesList, {
         params: {
           city: 'Gandhinagar',
-          // projectType: ['pgHostel'],
+          // projectType: ['pgHostel'],  // It throws 400 Error when I send this key and value therefore it is commented
           page: pageNumber,
-          limit: 6,
+          // limit: 6,  // The limit of 30 is already set from backend so this can't be changed from frontend need to modify limit value from backend...the pagination will work after every 30 cards
         },
       });
-
-      // console.log('getPropertyList success', response?.data?.propertyList);
       if (response?.data?.statusCode === 200) {
         setPropertyList(response?.data?.propertyList);
         const newProperties = response?.data?.propertyList;
@@ -118,16 +119,14 @@ const Home = () => {
   };
 
   const renderProperty = ({item, index}) => {
-    // console.log('itemmmmmmmm', index);
     const isSaved = savedProperties?.some(property => property.id === item.id);
     return (
       <View style={styles.card}>
         <FlatList
           horizontal
           ref={flatListRef}
-          data={item.images}
+          data={item?.images}
           renderItem={({item}) => {
-            // console.log('itemmmmmm', item);
             return (
               <Image
                 source={{
@@ -146,7 +145,7 @@ const Home = () => {
         />
         <View style={styles.counterContainer}>
           <Text style={styles.counterText}>
-            {currentIndex + 1} / {item.images.length}
+            {currentIndex + 1} / {item?.images?.length}
           </Text>
         </View>
         <View style={styles.featuredTypeView}>
@@ -170,7 +169,9 @@ const Home = () => {
             </Text>
           )}
 
-          <TouchableOpacity onPress={() => handleSaveProperty(item)}>
+          <TouchableOpacity
+            style={styles.heartView}
+            onPress={() => handleSaveProperty(item)}>
             <Heart
               name={isSaved ? 'heart-fill' : 'heart'}
               size={20}
@@ -178,7 +179,7 @@ const Home = () => {
             />
           </TouchableOpacity>
         </View>
-        <View style={{paddingVertical: 15}}>
+        <View style={{paddingBottom: 15}}>
           <Text style={styles.propertyNameText}>{item?.name}</Text>
           <Text style={styles.byText}>{`by ${item?.company?.name}`}</Text>
         </View>
@@ -207,7 +208,8 @@ const Home = () => {
           paddingHorizontal: 16,
           paddingVertical: 8,
           columnGap: 10,
-          borderColor: item.title === filterType ? Colors.orange : Colors.grey,
+          borderColor:
+            item.title === filterType ? Colors.orange : Colors.borderColor,
           borderWidth: 1,
           borderRadius: 30,
           flexDirection: 'row',
@@ -225,7 +227,8 @@ const Home = () => {
 
         <Text
           style={{
-            color: item.title === filterType ? Colors.orange : Colors.grey,
+            color:
+              item.title === filterType ? Colors.orange : Colors.filterText,
           }}>
           {item.title}
         </Text>
@@ -243,6 +246,14 @@ const Home = () => {
   const toggleModal = () => {
     setIsOpenModal(!isOpenModal);
   };
+
+  const onRefreshing = useCallback(() => {
+    setPage(1);
+    getPropertyList(1);
+    setTimeout(() => {
+      setRefresh(false);
+    }, 500);
+  }, []);
   return (
     <SafeAreaView style={styles.main}>
       <View style={styles.container}>
@@ -262,8 +273,15 @@ const Home = () => {
           showsVerticalScrollIndicator={false}
           ItemSeparatorComponent={() => <View style={{marginBottom: 15}} />}
           onEndReached={loadMoreProperties}
-          onEndReachedThreshold={0.5}
-          // keyExtractor={item => item.id.toString()}
+          onEndReachedThreshold={0.1}
+          refreshControl={
+            <RefreshControl
+              refreshing={refresh}
+              onRefresh={onRefreshing}
+              colors={[Colors.orange, Colors.orange]}
+              tintColor={Colors.orange}
+            />
+          }
           keyExtractor={(item, index) => `${item?.id}-${index}`.toString()}
           ListFooterComponent={
             loading ? (
@@ -277,6 +295,13 @@ const Home = () => {
               </View>
             ) : null
           }
+          ListEmptyComponent={() => {
+            return (
+              <View style={styles.noDataView}>
+                <Text style={styles.noDataText}>No properties found.</Text>
+              </View>
+            );
+          }}
         />
       </View>
       {isOpenModal && (
@@ -306,21 +331,21 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
     padding: 20,
     borderRadius: 10,
-    borderColor: Colors.grey,
+    borderColor: Colors.borderColor,
   },
   propertyNameText: {
-    color: Colors.black,
+    color: Colors.solidBlack,
     fontSize: 15,
     fontWeight: '500',
   },
   byText: {
-    color: Colors.black,
+    color: Colors.blackShade,
     fontSize: 14,
   },
   featuredTypeView: {
     backgroundColor: Colors.green,
     paddingVertical: 8,
-    marginTop: 10,
+    marginTop: 20,
     borderRadius: 5,
     alignSelf: 'flex-start',
     paddingHorizontal: 10,
@@ -329,18 +354,17 @@ const styles = StyleSheet.create({
   rangeAndHeartView: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingTop: 10,
     alignItems: 'center',
   },
   priceRangeText: {
-    color: Colors.black,
+    color: Colors.lightGrey,
     fontSize: 13,
     fontWeight: '700',
     paddingTop: 10,
   },
   featuredTypeText: {
     color: Colors.white,
-    fontSize: 12,
+    fontSize: 10,
   },
   image: {
     width: Dimensions.get('window').width / 1.3,
@@ -349,13 +373,19 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   locationText: {
-    color: Colors.black,
+    color: Colors.lightBlack,
     fontSize: 13,
   },
   typeText: {
-    color: Colors.black,
+    color: Colors.darkGrey,
     fontSize: 13,
     paddingTop: 15,
+  },
+  heartView: {
+    height: 50,
+    width: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   counterContainer: {
     backgroundColor: Colors.black,
@@ -381,5 +411,14 @@ const styles = StyleSheet.create({
   filtercountText: {
     color: Colors.white,
     fontSize: 10,
+  },
+  noDataView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  noDataText: {
+    color: Colors.black,
+    fontSize: 15,
   },
 });

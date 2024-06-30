@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
     flex: 1,
     // justifyContent: 'center',
     // alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
   },
   modalContent: {
     width: '90%', // Ensure the modal width fits within the screen
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   cancelButton: {
-    borderColor: Colors.black,
+    borderColor: Colors.filterText,
     borderWidth: 1,
     borderRadius: 20,
     paddingVertical: 8,

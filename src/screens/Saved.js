@@ -13,9 +13,9 @@ import {Colors} from '../assets/theme';
 import {useDispatch, useSelector} from 'react-redux';
 import Heart from 'react-native-vector-icons/Octicons';
 import Location from 'react-native-vector-icons/FontAwesome6';
-import {removeFromCart} from '../../src/redux/CartSlice';
 import {removeFromSavedList} from '../redux/SavedPropertySlice';
 import {convertToCrLac} from '../utils/convertCurrency';
+import {ImageCDN} from '../utils/apiService';
 const Saved = () => {
   const savedProperties = useSelector(state => state.myProperties);
   const dispatch = useDispatch();
@@ -42,7 +42,7 @@ const Saved = () => {
           renderItem={({item}) => (
             <Image
               source={{
-                uri: `https://logiqproperty.blr1.digitaloceanspaces.com/${item}`,
+                uri: `${ImageCDN}${item}`,
               }}
               style={styles.image}
             />
@@ -67,13 +67,7 @@ const Saved = () => {
               : 'Sample House Ready'}
           </Text>
         </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            paddingTop: 10,
-            alignItems: 'center',
-          }}>
+        <View style={styles.rangeAndHeartView}>
           {item?.displayPrice?.priceRange == null ? (
             <Text>Price range not decided</Text>
           ) : (
@@ -84,11 +78,13 @@ const Saved = () => {
               )} to ${convertToCrLac(item?.displayPrice?.priceRange?.to)}`}
             </Text>
           )}
-          <TouchableOpacity onPress={() => dispatch(removeFromSavedList(item))}>
+          <TouchableOpacity
+            style={styles.heartView}
+            onPress={() => dispatch(removeFromSavedList(item))}>
             <Heart name="heart-fill" size={20} color={Colors.orange} />
           </TouchableOpacity>
         </View>
-        <View style={{paddingVertical: 15}}>
+        <View style={{paddingBottom: 15}}>
           <Text style={styles.propertyNameText}>{item?.name}</Text>
           <Text style={styles.byText}>{`by ${item?.company?.name}`}</Text>
         </View>
@@ -127,6 +123,7 @@ const Saved = () => {
         <FlatList
           data={savedProperties}
           renderItem={renderProperty}
+          contentContainerStyle={{paddingBottom: 10}}
           showsVerticalScrollIndicator={false}
           ItemSeparatorComponent={() => <View style={{marginBottom: 15}} />}
           keyExtractor={item => item.id.toString()}
@@ -158,15 +155,15 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
     padding: 20,
     borderRadius: 10,
-    borderColor: Colors.grey,
+    borderColor: Colors.borderColor,
   },
   propertyNameText: {
-    color: Colors.black,
+    color: Colors.solidBlack,
     fontSize: 15,
     fontWeight: '500',
   },
   byText: {
-    color: Colors.black,
+    color: Colors.blackShade,
     fontSize: 14,
   },
   image: {
@@ -176,22 +173,21 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   locationText: {
-    color: Colors.black,
+    color: Colors.lightBlack,
     fontSize: 13,
   },
   typeText: {
-    color: Colors.black,
+    color: Colors.darkGrey,
     fontSize: 13,
     paddingTop: 15,
   },
   rangeAndHeartView: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingTop: 10,
     alignItems: 'center',
   },
   priceRangeText: {
-    color: Colors.black,
+    color: Colors.lightGrey,
     fontSize: 13,
     fontWeight: '700',
     paddingTop: 10,
@@ -209,6 +205,12 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     fontWeight: '700',
     fontSize: 15,
+  },
+  heartView: {
+    height: 50,
+    width: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   normalText: {
     color: Colors.black,
@@ -243,7 +245,7 @@ const styles = StyleSheet.create({
   featuredTypeView: {
     backgroundColor: Colors.green,
     paddingVertical: 8,
-    marginTop: 10,
+    marginTop: 20,
     borderRadius: 5,
     alignSelf: 'flex-start',
     paddingHorizontal: 10,
@@ -251,6 +253,6 @@ const styles = StyleSheet.create({
   },
   featuredTypeText: {
     color: Colors.white,
-    fontSize: 12,
+    fontSize: 10,
   },
 });

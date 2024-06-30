@@ -6,7 +6,7 @@ const CityExpert = () => {
   return (
     <SafeAreaView style={styles.main}>
       <View style={styles.container}>
-        <Text style={styles.title}>CityExpert</Text>
+        <Text style={styles.title}>City Expert</Text>
       </View>
     </SafeAreaView>
   );
