@@ -156,6 +156,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 10,
     borderColor: Colors.borderColor,
+    backgroundColor: Colors.white,
   },
   propertyNameText: {
     color: Colors.solidBlack,

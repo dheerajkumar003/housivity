@@ -331,6 +331,7 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
     padding: 20,
     borderRadius: 10,
+    backgroundColor: Colors.white,
     borderColor: Colors.borderColor,
   },
   propertyNameText: {
