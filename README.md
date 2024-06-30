@@ -1,8 +1,14 @@
+**[**********\*************NOTE********\*\*********]\*\*
+
+As per the assigned task when I passed the key and vaule --- projectType: ['pgHostel'] It throws 400 Error therefore it is commented in the code
+
+And also I was asked to implement pagination after every 6 cards but The limit of 30 is already set from backend so this can't be changed from frontend need to modify limit value from backend only...the pagination will work after every 30 cards.
+
 This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
 
 # Getting Started
 
->**Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.
+> **Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.
 
 ## Step 1: Start the Metro Server
 
